@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Foto Timestamp</title>
     <style>
-        /* ---- Global ---- */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
@@ -20,16 +19,8 @@
             margin-bottom: 20px;
             text-align: center;
             color: #2c3e50;
-            letter-spacing: 0.5px;
         }
 
-        h2,
-        h3 {
-            margin-top: 30px;
-            color: #34495e;
-        }
-
-        /* ---- Form ---- */
         .form-input {
             margin-bottom: 18px;
             display: flex;
@@ -48,17 +39,8 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             background: #fff;
-            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        .form-input input:focus,
-        .form-input select:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
-        }
-
-        /* ---- Buttons ---- */
         .btn {
             margin: 6px;
             padding: 10px 18px;
@@ -67,17 +49,11 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
         }
 
         .btn-primary {
             background: #007bff;
             color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
         }
 
         .btn-primary:hover {
@@ -92,21 +68,14 @@
             border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
-            transition: background 0.3s;
         }
 
-        .btn-download:hover {
-            background: #1e7e34;
-        }
-
-        /* ---- Video & Canvas ---- */
         #video {
             width: 100%;
             max-width: 480px;
             border: 2px solid #007bff33;
             border-radius: 12px;
             display: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             margin-top: 10px;
         }
 
@@ -114,7 +83,6 @@
             display: none;
         }
 
-        /* ---- Gallery ---- */
         .gallery {
             display: flex;
             flex-wrap: wrap;
@@ -128,18 +96,12 @@
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             text-align: center;
-            transition: transform 0.3s;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.03);
         }
 
         .gallery-item img {
             max-width: 220px;
             border-radius: 10px;
             margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -182,7 +144,6 @@
         const gallery = document.getElementById("gallery");
         const captureBtn = document.getElementById("capture");
 
-        // logo dari URL
         const logo = new Image();
         logo.crossOrigin = "anonymous";
         logo.src = "https://3.bp.blogspot.com/-785KT0vymeM/WmHvm2hNWtI/AAAAAAAABeE/DaWbakR0SUMqWllKJX6vk2IgmO2AryW7ACLcBGAs/s1600/LOGO%2BVECTORKU-3.jpg";
@@ -213,9 +174,9 @@
             const waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
             const tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
 
-            // Ukuran font disesuaikan agar mirip foto 1
             const fontJudul = Math.floor(h * 0.045);
             const fontDetail = Math.floor(h * 0.03);
+            const lineSpacingDetail = fontDetail + 16; // <-- Jarak lebih jauh
             const fontMarkiBig = Math.floor(h * 0.035);
             const fontMarkiSmall = Math.floor(h * 0.025);
 
@@ -239,18 +200,18 @@
             const baseX = 20;
             let y = h - 20;
 
-            // === Detail: bold + jarak lebih longgar ===
+            // === Detail: bold + jarak lebih lega ===
             ctx.font = `bold ${fontDetail}px Arial`;
             for (let i = textLines.length - 1; i >= 0; i--) {
                 ctx.fillText(textLines[i], baseX, y);
-                y -= fontDetail + 10; // jarak antarbaris lebih besar
+                y -= lineSpacingDetail;
             }
 
             // === Judul ===
             ctx.font = `bold ${fontJudul}px Arial`;
             for (let i = judulLines.length - 1; i >= 0; i--) {
                 ctx.fillText(judulLines[i], baseX, y);
-                y -= fontJudul + 8;
+                y -= fontJudul + 10;
             }
 
             // === Logo ===
@@ -265,7 +226,6 @@
             ctx.font = `bold ${fontMarkiBig}px Arial`;
             ctx.fillText("Marki", w - 30, h - 20 - fontMarkiSmall - 4);
 
-            // hasil ke galeri
             const dataUrl = canvas.toDataURL("image/png");
             const item = document.createElement("div");
             item.className = "gallery-item";
