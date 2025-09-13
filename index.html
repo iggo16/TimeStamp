@@ -150,14 +150,18 @@
 
         function openCamera() {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
+                navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 } } // minta resolusi tinggi
+                })
                     .then(s => {
                         video.style.display = "block";
                         captureBtn.style.display = "inline-block";
                         video.srcObject = s;
                     })
                     .catch(() => document.getElementById("fileInput").click());
-            } else document.getElementById("fileInput").click();
+            } else {
+                document.getElementById("fileInput").click();
+            }
         }
 
         function renderImage(img) {
@@ -176,7 +180,7 @@
 
             const fontJudul = Math.floor(h * 0.045);
             const fontDetail = Math.floor(h * 0.03);
-            const lineSpacingDetail = fontDetail + 16; // <-- Jarak lebih jauh
+            const lineSpacingDetail = fontDetail * 2; // <<< proporsional (2x tinggi huruf)
             const fontMarkiBig = Math.floor(h * 0.035);
             const fontMarkiSmall = Math.floor(h * 0.025);
 
@@ -200,7 +204,7 @@
             const baseX = 20;
             let y = h - 20;
 
-            // === Detail: bold + jarak lebih lega ===
+            // === Detail dengan jarak proporsional ===
             ctx.font = `bold ${fontDetail}px Arial`;
             for (let i = textLines.length - 1; i >= 0; i--) {
                 ctx.fillText(textLines[i], baseX, y);
