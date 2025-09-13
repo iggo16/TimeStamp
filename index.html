@@ -2,220 +2,230 @@
 <html lang="id">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Foto Timestamp Format Marki</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 16px;
-            background: #f4f4f8;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Foto Timestamp Format Marki</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 16px;
+      background: #f4f4f8;
+    }
 
-        h1 {
-            font-size: 20px;
-        }
+    h1 {
+      font-size: 20px;
+    }
 
-        #video {
-            width: 320px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-        }
+    #video {
+      width: 320px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      display: none;
+    }
 
-        #canvas {
-            display: none;
-        }
+    #canvas {
+      display: none;
+    }
 
-        .btn {
-            margin: 6px;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    .btn {
+      margin: 6px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
 
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
 
-        .gallery-item {
-            display: inline-block;
-            margin: 10px;
-            text-align: center;
-        }
+    .gallery-item {
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
 
-        .gallery-item img {
-            max-width: 220px;
-            border-radius: 6px;
-            display: block;
-            margin-bottom: 6px;
-        }
+    .gallery-item img {
+      max-width: 220px;
+      border-radius: 6px;
+      display: block;
+      margin-bottom: 6px;
+    }
 
-        .btn-download {
-            background: green;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-    </style>
+    .btn-download {
+      background: green;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Foto dengan Timestamp Format Marki</h1>
+  <h1>Foto dengan Timestamp Format Marki</h1>
 
-    <!-- Form input manual -->
-    <div class="form-input">
-        <label>Judul Kegiatan:</label>
-        <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
-    </div>
+  <!-- Form input manual -->
+  <div class="form-input">
+    <label>Judul Kegiatan:</label>
+    <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
+  </div>
 
-    <div class="form-input">
-        <label>Pilih Lokasi:</label>
-        <select id="lokasiSelect">
-            <option value="SMP Negeri 1 Pajarakan|7.774930°S, 113.383830°E">SMP Negeri 1 Pajarakan</option>
-            <option value="SMKI Pajarakan|9.999°S, 113.383830°E">SMKI Pajarakan</option>
-        </select>
-    </div>
+  <div class="form-input">
+    <label>Pilih Lokasi:</label>
+    <select id="lokasiSelect">
+      <option value="SMP Negeri 1 Pajarakan|7.774930°S, 113.383830°E">SMP Negeri 1 Pajarakan</option>
+      <option value="SMKI Pajarakan|9.999°S, 113.383830°E">SMKI Pajarakan</option>
+    </select>
+  </div>
 
-    <div class="form-input">
-        <label>Nama:</label>
-        <input type="text" id="nama" value="Mochamad Siddiq">
-    </div>
+  <div class="form-input">
+    <label>Nama:</label>
+    <input type="text" id="nama" value="Mochamad Siddiq">
+  </div>
 
-    <h3>Ambil Foto dari Kamera</h3>
-    <video id="video" autoplay playsinline></video><br>
-    <button class="btn btn-primary" id="capture">Ambil Foto</button>
+  <h3>Ambil Foto</h3>
+  <button class="btn btn-primary" onclick="openCamera()">Buka Kamera</button>
+  <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" multiple>
 
-    <h3>Atau Pilih Foto dari File</h3>
-    <input type="file" id="fileInput" accept="image/*" class="btn" multiple>
+  <video id="video" autoplay playsinline></video><br>
+  <button class="btn btn-primary" id="capture" style="display:none;">Ambil Foto</button>
 
-    <canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
 
-    <h2>Hasil Foto</h2>
-    <div class="gallery" id="gallery"></div>
+  <h2>Hasil Foto</h2>
+  <div class="gallery" id="gallery"></div>
 
-    <script>
-        const video = document.getElementById("video");
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        const gallery = document.getElementById("gallery");
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const gallery = document.getElementById("gallery");
+    const captureBtn = document.getElementById("capture");
 
-        // Akses kamera
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+    // Buka kamera dengan fallback
+    function openCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            video.style.display = "block";
+            captureBtn.style.display = "inline-block";
             video.srcObject = stream;
-        });
+          })
+          .catch(err => {
+            document.getElementById("fileInput").click();
+          });
+      } else {
+        document.getElementById("fileInput").click();
+      }
+    }
 
-        // Fungsi buat render foto dengan timestamp
-        function renderImage(img) {
-            const w = img.width;
-            const h = img.height;
-            canvas.width = w;
-            canvas.height = h;
+    // Fungsi buat render foto dengan timestamp
+    function renderImage(img) {
+      const w = img.width;
+      const h = img.height;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
 
-            ctx.drawImage(img, 0, 0, w, h);
+      const judul = document.getElementById("judul").value;
+      const lokasiSelect = document.getElementById("lokasiSelect").value.split("|");
+      const lokasi = lokasiSelect[0];
+      const koordinat = lokasiSelect[1];
+      const nama = document.getElementById("nama").value;
 
-            // Ambil nilai input
-            const judul = document.getElementById("judul").value;
-            const lokasiSelect = document.getElementById("lokasiSelect").value.split("|");
-            const lokasi = lokasiSelect[0];
-            const koordinat = lokasiSelect[1];
-            const nama = document.getElementById("nama").value;
+      let now = new Date();
+      let waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
 
-            // Buat waktu otomatis
-            let now = new Date();
-            let waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-            let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+      const fontJudul = Math.floor(h * 0.04);
+      const fontDetail = Math.floor(h * 0.025);
+      const fontMarkiBig = Math.floor(h * 0.035);
+      const fontMarkiSmall = Math.floor(h * 0.025);
 
-            // Skala font proporsional terhadap tinggi gambar
-            const fontJudul = Math.floor(h * 0.04);     // 4% tinggi
-            const fontDetail = Math.floor(h * 0.025);   // 2.5% tinggi
-            const fontMarkiBig = Math.floor(h * 0.035);
-            const fontMarkiSmall = Math.floor(h * 0.025);
+      ctx.fillStyle = "white";
+      ctx.textBaseline = "top";
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 6;
+      ctx.textAlign = "left";
 
-            ctx.fillStyle = "white";
-            ctx.textBaseline = "top";
-            ctx.shadowColor = "black";
-            ctx.shadowBlur = 6;
-            ctx.textAlign = "left";
+      // Judul
+      ctx.font = `${fontJudul}px Arial Black`;
+      let y = h - (7 * fontDetail + fontJudul + 80);
+      ctx.fillText(judul, 30, y);
+      y += fontJudul + 10;
 
-            // Judul
-            ctx.font = `${fontJudul}px Arial Black`;
-            let y = h - (7 * fontDetail + fontJudul + 80); // biar pas di bawah
-            ctx.fillText(judul, 30, y);
-            y += fontJudul + 10;
+      // Detail
+      ctx.font = `${fontDetail}px Arial`;
+      let textLines = [
+        `• Waktu: ${waktu}`,
+        `• Tanggal: ${tanggal}`,
+        `• Lokasi: ${lokasi}`,
+        `• Koordinat: ${koordinat}`,
+        `• ${nama}`,
+        "✓ Waktu & lokasi diverifikasi oleh Marki"
+      ];
+      textLines.forEach(line => {
+        ctx.fillText(line, 30, y);
+        y += fontDetail + 8;
+      });
 
-            // Detail kegiatan
-            ctx.font = `${fontDetail}px Arial`;
-            let textLines = [
-                `• Waktu: ${waktu}`,
-                `• Tanggal: ${tanggal}`,
-                `• Lokasi: ${lokasi}`,
-                `• Koordinat: ${koordinat}`,
-                `• ${nama}`,
-                "✓ Waktu & lokasi diverifikasi oleh Marki"
-            ];
-            textLines.forEach(line => {
-                ctx.fillText(line, 30, y);
-                y += fontDetail + 8;
-            });
+      // Watermark kanan bawah
+      ctx.textAlign = "right";
+      ctx.font = `${fontMarkiBig}px Arial Black`;
+      ctx.fillText("Marki", w - 30, h - (fontMarkiBig + fontMarkiSmall + 20));
 
-            // Watermark di pojok kanan bawah
-            ctx.textAlign = "right";
-            ctx.font = `${fontMarkiBig}px Arial Black`;
-            ctx.fillText("Marki", w - 30, h - (fontMarkiBig + fontMarkiSmall + 20));
+      ctx.font = `${fontMarkiSmall}px Arial`;
+      ctx.fillText("Waktu asli", w - 30, h - (fontMarkiSmall + 10));
 
-            ctx.font = `${fontMarkiSmall}px Arial`;
-            ctx.fillText("Waktu asli", w - 30, h - (fontMarkiSmall + 10));
+      const dataUrl = canvas.toDataURL("image/png");
 
-            const dataUrl = canvas.toDataURL("image/png");
+      const item = document.createElement("div");
+      item.className = "gallery-item";
 
-            const item = document.createElement("div");
-            item.className = "gallery-item";
+      const newImg = new Image();
+      newImg.src = dataUrl;
 
-            const newImg = new Image();
-            newImg.src = dataUrl;
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "foto_timestamp.png";
+      link.className = "btn-download";
+      link.innerText = "Download Foto";
 
-            const link = document.createElement("a");
-            link.href = dataUrl;
-            link.download = "foto_timestamp.png";
-            link.className = "btn-download";
-            link.innerText = "Download Foto";
+      item.appendChild(newImg);
+      item.appendChild(link);
+      gallery.appendChild(item);
+    }
 
-            item.appendChild(newImg);
-            item.appendChild(link);
-            gallery.appendChild(item);
-        }
+    // Capture dari kamera
+    captureBtn.onclick = () => {
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(video, 0, 0, w, h);
 
-        // Capture dari kamera
-        document.getElementById("capture").onclick = () => {
-            const w = video.videoWidth;
-            const h = video.videoHeight;
-            canvas.width = w;
-            canvas.height = h;
+      let img = new Image();
+      img.src = canvas.toDataURL("image/png");
+      img.onload = () => renderImage(img);
+    };
 
-            ctx.drawImage(video, 0, 0, w, h);
-            let img = new Image();
-            img.src = canvas.toDataURL("image/png");
-            img.onload = () => renderImage(img);
+    // Upload file fallback
+    document.getElementById("fileInput").onchange = (e) => {
+      const files = e.target.files;
+      if (!files) return;
+      [...files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          let img = new Image();
+          img.src = ev.target.result;
+          img.onload = () => renderImage(img);
         };
-
-        // Upload file foto (bisa banyak)
-        document.getElementById("fileInput").onchange = (e) => {
-            const files = e.target.files;
-            if (!files) return;
-            [...files].forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    let img = new Image();
-                    img.src = ev.target.result;
-                    img.onload = () => renderImage(img);
-                };
-                reader.readAsDataURL(file);
-            });
-        };
-    </script>
+        reader.readAsDataURL(file);
+      });
+    };
+  </script>
 </body>
 
 </html>
