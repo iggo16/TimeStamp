@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Foto Timestamp Manual + Lokasi</title>
+    <title>Foto Timestamp Manual</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,21 +70,18 @@
         <label>Judul Kegiatan:</label>
         <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
     </div>
+
     <div class="form-input">
-        <label>Lokasi:</label>
-        <input type="text" id="lokasi" placeholder="Mengambil lokasi..." value="">
+        <label>Pilih Lokasi:</label>
+        <select id="lokasiSelect">
+            <option value="SMP Negeri 1 Pajarakan|7.774930°S, 113.383830°E">SMP Negeri 1 Pajarakan</option>
+            <option value="SMKI Pajarakan|9.999°S, 113.383830°E">SMKI Pajarakan</option>
+        </select>
     </div>
-    <div class="form-input">
-        <label>Koordinat:</label>
-        <input type="text" id="koordinat" placeholder="Mengambil koordinat..." value="">
-    </div>
+
     <div class="form-input">
         <label>Nama:</label>
         <input type="text" id="nama" value="Mochamad Siddiq">
-    </div>
-    <div class="form-input">
-        <label>Instansi:</label>
-        <input type="text" id="instansi" value="SMP N 1 PAJARAKAN">
     </div>
 
     <h3>Ambil Foto dari Kamera</h3>
@@ -105,26 +102,6 @@
         const ctx = canvas.getContext("2d");
         const gallery = document.getElementById("gallery");
 
-        // Ambil lokasi otomatis
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude.toFixed(6);
-                    const lon = pos.coords.longitude.toFixed(6);
-                    document.getElementById("koordinat").value = `${lat}, ${lon}`;
-                    document.getElementById("lokasi").value = `https://maps.google.com/?q=${lat},${lon}`;
-                },
-                (err) => {
-                    console.warn("Lokasi gagal:", err.message);
-                    document.getElementById("lokasi").placeholder = "Lokasi gagal didapat";
-                    document.getElementById("koordinat").placeholder = "Koordinat gagal didapat";
-                }
-            );
-        } else {
-            document.getElementById("lokasi").placeholder = "Geolocation tidak didukung";
-            document.getElementById("koordinat").placeholder = "Geolocation tidak didukung";
-        }
-
         // Akses kamera
         navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
             video.srcObject = stream;
@@ -141,10 +118,10 @@
 
             // Ambil nilai input
             const judul = document.getElementById("judul").value;
-            const lokasi = document.getElementById("lokasi").value;
-            const koordinat = document.getElementById("koordinat").value;
+            const lokasiSelect = document.getElementById("lokasiSelect").value.split("|");
+            const lokasi = lokasiSelect[0];
+            const koordinat = lokasiSelect[1];
             const nama = document.getElementById("nama").value;
-            const instansi = document.getElementById("instansi").value;
 
             // Buat waktu otomatis
             let now = new Date();
@@ -165,7 +142,6 @@
                 `• Lokasi: ${lokasi}`,
                 `• Koordinat: ${koordinat}`,
                 `• ${nama}`,
-                `• ${instansi}`,
                 "✓ Waktu & lokasi diverifikasi oleh Marki"
             ];
 
