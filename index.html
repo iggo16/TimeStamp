@@ -213,8 +213,9 @@
             const waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
             const tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
 
-            const fontJudul = Math.floor(h * 0.04);
-            const fontDetail = Math.floor(h * 0.025);
+            // Ukuran font disesuaikan agar mirip foto 1
+            const fontJudul = Math.floor(h * 0.045);
+            const fontDetail = Math.floor(h * 0.03);
             const fontMarkiBig = Math.floor(h * 0.035);
             const fontMarkiSmall = Math.floor(h * 0.025);
 
@@ -231,28 +232,32 @@
             ctx.shadowColor = "black";
             ctx.shadowBlur = 6;
             ctx.textAlign = "left";
+            ctx.textBaseline = "bottom";
 
             const logoWidth = w * 0.10;
             const logoHeight = logoWidth * (logo.height / logo.width);
             const baseX = 20;
             let y = h - 20;
-            ctx.textBaseline = "bottom";
 
-            ctx.font = `${fontDetail}px Arial`;
+            // === Detail: bold + jarak lebih longgar ===
+            ctx.font = `bold ${fontDetail}px Arial`;
             for (let i = textLines.length - 1; i >= 0; i--) {
                 ctx.fillText(textLines[i], baseX, y);
-                y -= fontDetail + 6;
+                y -= fontDetail + 10; // jarak antarbaris lebih besar
             }
 
+            // === Judul ===
             ctx.font = `bold ${fontJudul}px Arial`;
             for (let i = judulLines.length - 1; i >= 0; i--) {
                 ctx.fillText(judulLines[i], baseX, y);
-                y -= fontJudul + 6;
+                y -= fontJudul + 8;
             }
 
+            // === Logo ===
             y -= logoHeight;
             ctx.drawImage(logo, baseX, y, logoWidth, logoHeight);
 
+            // === Marki kanan bawah ===
             ctx.textAlign = "right";
             ctx.textBaseline = "bottom";
             ctx.font = `${fontMarkiSmall}px Arial`;
@@ -260,6 +265,7 @@
             ctx.font = `bold ${fontMarkiBig}px Arial`;
             ctx.fillText("Marki", w - 30, h - 20 - fontMarkiSmall - 4);
 
+            // hasil ke galeri
             const dataUrl = canvas.toDataURL("image/png");
             const item = document.createElement("div");
             item.className = "gallery-item";
