@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Foto dengan Timestamp & Lokasi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 16px;
+            background: #f4f4f8;
+        }
+
+        h1 {
+            font-size: 20px;
+        }
+
+        #video {
+            width: 320px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .btn {
+            margin: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .gallery img {
+            max-width: 200px;
+            margin: 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ambil Foto dengan Timestamp</h1>
+
+    <video id="video" autoplay playsinline></video><br>
+    <button class="btn btn-primary" id="capture">Ambil Foto</button>
+    <canvas id="canvas"></canvas>
+
+    <h2>Hasil Foto</h2>
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const gallery = document.getElementById("gallery");
+
+        // Minta akses kamera
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+        });
+
+        document.getElementById("capture").onclick = () => {
+            const w = video.videoWidth;
+            const h = video.videoHeight;
+            canvas.width = w;
+            canvas.height = h;
+
+            // Gambar foto
+            ctx.drawImage(video, 0, 0, w, h);
+
+            // Tambahkan timestamp & teks
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.textBaseline = "top";
+
+            let now = new Date();
+            let waktu = now.toLocaleTimeString();
+            let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+            let lokasi = "SMP Negeri 1 Pajarakan";
+            let koordinat = "7.774930°S, 113.383830°E";
+            let nama = "Mochamad Siddiq";
+
+            let textLines = [
+                "Extrakuriler Pencak Silat",
+                `Waktu: ${waktu}`,
+                `Tanggal: ${tanggal}`,
+                `Lokasi: ${lokasi}`,
+                `Koordinat: ${koordinat}`,
+                `Nama: ${nama}`,
+                "Waktu & lokasi diverifikasi sistem"
+            ];
+
+            let y = 20;
+            textLines.forEach(line => {
+                ctx.fillText(line, 20, y);
+                y += 28;
+            });
+
+            // Buat image
+            const img = new Image();
+            img.src = canvas.toDataURL("image/png");
+            gallery.appendChild(img);
+        };
+    </script>
+</body>
+
+</html>
