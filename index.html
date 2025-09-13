@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Foto dengan Timestamp & Lokasi</title>
+    <title>Foto Timestamp Manual + Lokasi</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,19 +39,61 @@
             color: white;
         }
 
-        .gallery img {
-            max-width: 200px;
-            margin: 8px;
+        .gallery-item {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .gallery-item img {
+            max-width: 220px;
             border-radius: 6px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .btn-download {
+            background: green;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
         }
     </style>
 </head>
 
 <body>
-    <h1>Ambil Foto dengan Timestamp</h1>
+    <h1>Foto dengan Timestamp Format Marki</h1>
 
+    <!-- Form input manual -->
+    <div class="form-input">
+        <label>Judul Kegiatan:</label>
+        <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
+    </div>
+    <div class="form-input">
+        <label>Lokasi:</label>
+        <input type="text" id="lokasi" placeholder="Mengambil lokasi..." value="">
+    </div>
+    <div class="form-input">
+        <label>Koordinat:</label>
+        <input type="text" id="koordinat" placeholder="Mengambil koordinat..." value="">
+    </div>
+    <div class="form-input">
+        <label>Nama:</label>
+        <input type="text" id="nama" value="Mochamad Siddiq">
+    </div>
+    <div class="form-input">
+        <label>Instansi:</label>
+        <input type="text" id="instansi" value="SMP N 1 PAJARAKAN">
+    </div>
+
+    <h3>Ambil Foto dari Kamera</h3>
     <video id="video" autoplay playsinline></video><br>
     <button class="btn btn-primary" id="capture">Ambil Foto</button>
+
+    <h3>Atau Pilih Foto dari File</h3>
+    <input type="file" id="fileInput" accept="image/*" class="btn">
+
     <canvas id="canvas"></canvas>
 
     <h2>Hasil Foto</h2>
@@ -63,52 +105,126 @@
         const ctx = canvas.getContext("2d");
         const gallery = document.getElementById("gallery");
 
-        // Minta akses kamera
+        // Ambil lokasi otomatis
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude.toFixed(6);
+                    const lon = pos.coords.longitude.toFixed(6);
+                    document.getElementById("koordinat").value = `${lat}, ${lon}`;
+                    document.getElementById("lokasi").value = `https://maps.google.com/?q=${lat},${lon}`;
+                },
+                (err) => {
+                    console.warn("Lokasi gagal:", err.message);
+                    document.getElementById("lokasi").placeholder = "Lokasi gagal didapat";
+                    document.getElementById("koordinat").placeholder = "Koordinat gagal didapat";
+                }
+            );
+        } else {
+            document.getElementById("lokasi").placeholder = "Geolocation tidak didukung";
+            document.getElementById("koordinat").placeholder = "Geolocation tidak didukung";
+        }
+
+        // Akses kamera
         navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
             video.srcObject = stream;
         });
 
+        // Fungsi buat render foto dengan timestamp
+        function renderImage(img) {
+            const w = img.width;
+            const h = img.height;
+            canvas.width = w;
+            canvas.height = h;
+
+            ctx.drawImage(img, 0, 0, w, h);
+
+            // Ambil nilai input
+            const judul = document.getElementById("judul").value;
+            const lokasi = document.getElementById("lokasi").value;
+            const koordinat = document.getElementById("koordinat").value;
+            const nama = document.getElementById("nama").value;
+            const instansi = document.getElementById("instansi").value;
+
+            // Buat waktu otomatis
+            let now = new Date();
+            let waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+            let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+
+            // Style teks
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.textBaseline = "top";
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 6;
+
+            let textLines = [
+                `• ${judul}`,
+                `• Waktu: ${waktu}`,
+                `• Tanggal: ${tanggal}`,
+                `• Lokasi: ${lokasi}`,
+                `• Koordinat: ${koordinat}`,
+                `• ${nama}`,
+                `• ${instansi}`,
+                "✓ Waktu & lokasi diverifikasi oleh Marki"
+            ];
+
+            let y = 40;
+            textLines.forEach(line => {
+                ctx.fillText(line, 30, y);
+                y += 28;
+            });
+
+            // Watermark di pojok kanan bawah
+            ctx.font = "26px Arial Black";
+            ctx.textAlign = "right";
+            ctx.fillText("Marki", w - 30, h - 70);
+            ctx.font = "18px Arial";
+            ctx.fillText("Waktu asli", w - 30, h - 40);
+
+            const dataUrl = canvas.toDataURL("image/png");
+
+            const item = document.createElement("div");
+            item.className = "gallery-item";
+
+            const newImg = new Image();
+            newImg.src = dataUrl;
+
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = "foto_timestamp.png";
+            link.className = "btn-download";
+            link.innerText = "Download Foto";
+
+            item.appendChild(newImg);
+            item.appendChild(link);
+            gallery.appendChild(item);
+        }
+
+        // Capture dari kamera
         document.getElementById("capture").onclick = () => {
             const w = video.videoWidth;
             const h = video.videoHeight;
             canvas.width = w;
             canvas.height = h;
 
-            // Gambar foto
             ctx.drawImage(video, 0, 0, w, h);
-
-            // Tambahkan timestamp & teks
-            ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
-            ctx.textBaseline = "top";
-
-            let now = new Date();
-            let waktu = now.toLocaleTimeString();
-            let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-            let lokasi = "SMP Negeri 1 Pajarakan";
-            let koordinat = "7.774930°S, 113.383830°E";
-            let nama = "Mochamad Siddiq";
-
-            let textLines = [
-                "Extrakuriler Pencak Silat",
-                `Waktu: ${waktu}`,
-                `Tanggal: ${tanggal}`,
-                `Lokasi: ${lokasi}`,
-                `Koordinat: ${koordinat}`,
-                `Nama: ${nama}`,
-                "Waktu & lokasi diverifikasi sistem"
-            ];
-
-            let y = 20;
-            textLines.forEach(line => {
-                ctx.fillText(line, 20, y);
-                y += 28;
-            });
-
-            // Buat image
-            const img = new Image();
+            let img = new Image();
             img.src = canvas.toDataURL("image/png");
-            gallery.appendChild(img);
+            img.onload = () => renderImage(img);
+        };
+
+        // Upload file foto
+        document.getElementById("fileInput").onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                let img = new Image();
+                img.src = ev.target.result;
+                img.onload = () => renderImage(img);
+            };
+            reader.readAsDataURL(file);
         };
     </script>
 </body>
