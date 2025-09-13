@@ -2,230 +2,227 @@
 <html lang="id">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Foto Timestamp Format Marki</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 16px;
-      background: #f4f4f8;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Foto Timestamp Marki + Logo URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 16px;
+            background: #f4f4f8;
+        }
 
-    h1 {
-      font-size: 20px;
-    }
+        h1 {
+            font-size: 20px;
+        }
 
-    #video {
-      width: 320px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      display: none;
-    }
+        #video {
+            width: 320px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            display: none;
+        }
 
-    #canvas {
-      display: none;
-    }
+        #canvas {
+            display: none;
+        }
 
-    .btn {
-      margin: 6px;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+        .btn {
+            margin: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-    .btn-primary {
-      background: #007bff;
-      color: white;
-    }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
 
-    .gallery-item {
-      display: inline-block;
-      margin: 10px;
-      text-align: center;
-    }
+        .gallery-item {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
 
-    .gallery-item img {
-      max-width: 220px;
-      border-radius: 6px;
-      display: block;
-      margin-bottom: 6px;
-    }
+        .gallery-item img {
+            max-width: 220px;
+            border-radius: 6px;
+            display: block;
+            margin-bottom: 6px;
+        }
 
-    .btn-download {
-      background: green;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 5px;
-      text-decoration: none;
-    }
-  </style>
+        .btn-download {
+            background: green;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
-  <h1>Foto dengan Timestamp Format Marki</h1>
+    <h1>Foto Timestamp Marki + Logo URL</h1>
 
-  <!-- Form input manual -->
-  <div class="form-input">
-    <label>Judul Kegiatan:</label>
-    <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
-  </div>
+    <div class="form-input">
+        <label>Judul Kegiatan:</label>
+        <input type="text" id="judul" value="Ekstrakurikuler Pencak Silat">
+    </div>
+    <div class="form-input">
+        <label>Pilih Lokasi:</label>
+        <select id="lokasiSelect">
+            <option value="SMP Negeri 1 Pajarakan|7.774930°S, 113.383830°E">SMP Negeri 1 Pajarakan</option>
+            <option value="SMKI Pajarakan|9.999°S, 113.383830°E">SMKI Pajarakan</option>
+        </select>
+    </div>
+    <div class="form-input">
+        <label>Nama:</label>
+        <input type="text" id="nama" value="Mochamad Siddiq">
+    </div>
 
-  <div class="form-input">
-    <label>Pilih Lokasi:</label>
-    <select id="lokasiSelect">
-      <option value="SMP Negeri 1 Pajarakan|7.774930°S, 113.383830°E">SMP Negeri 1 Pajarakan</option>
-      <option value="SMKI Pajarakan|9.999°S, 113.383830°E">SMKI Pajarakan</option>
-    </select>
-  </div>
+    <h3>Ambil Foto</h3>
+    <button class="btn btn-primary" onclick="openCamera()">Buka Kamera</button>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" multiple>
 
-  <div class="form-input">
-    <label>Nama:</label>
-    <input type="text" id="nama" value="Mochamad Siddiq">
-  </div>
+    <video id="video" autoplay playsinline></video><br>
+    <button class="btn btn-primary" id="capture" style="display:none;">Ambil Foto</button>
 
-  <h3>Ambil Foto</h3>
-  <button class="btn btn-primary" onclick="openCamera()">Buka Kamera</button>
-  <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" multiple>
+    <canvas id="canvas"></canvas>
 
-  <video id="video" autoplay playsinline></video><br>
-  <button class="btn btn-primary" id="capture" style="display:none;">Ambil Foto</button>
+    <h2>Hasil Foto</h2>
+    <div class="gallery" id="gallery"></div>
 
-  <canvas id="canvas"></canvas>
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const gallery = document.getElementById("gallery");
+        const captureBtn = document.getElementById("capture");
 
-  <h2>Hasil Foto</h2>
-  <div class="gallery" id="gallery"></div>
+        // logo dari URL
+        const logo = new Image();
+        logo.crossOrigin = "anonymous";
+        logo.src = "https://3.bp.blogspot.com/-785KT0vymeM/WmHvm2hNWtI/AAAAAAAABeE/DaWbakR0SUMqWllKJX6vk2IgmO2AryW7ACLcBGAs/s1600/LOGO%2BVECTORKU-3.jpg";
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const gallery = document.getElementById("gallery");
-    const captureBtn = document.getElementById("capture");
+        function openCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(s => {
+                        video.style.display = "block";
+                        captureBtn.style.display = "inline-block";
+                        video.srcObject = s;
+                    })
+                    .catch(() => document.getElementById("fileInput").click());
+            } else document.getElementById("fileInput").click();
+        }
 
-    // Buka kamera dengan fallback
-    function openCamera() {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            video.style.display = "block";
-            captureBtn.style.display = "inline-block";
-            video.srcObject = stream;
-          })
-          .catch(err => {
-            document.getElementById("fileInput").click();
-          });
-      } else {
-        document.getElementById("fileInput").click();
-      }
-    }
+        function renderImage(img) {
+            const w = img.width, h = img.height;
+            canvas.width = w; canvas.height = h;
+            ctx.drawImage(img, 0, 0, w, h);
 
-    // Fungsi buat render foto dengan timestamp
-    function renderImage(img) {
-      const w = img.width;
-      const h = img.height;
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(img, 0, 0, w, h);
+            const judulRaw = document.getElementById("judul").value.trim();
+            // paksa pecah menjadi dua baris pada spasi pertama
+            const judulLines = judulRaw.replace("Ekstrakurikuler ", "Ekstrakurikuler\n").split("\n");
 
-      const judul = document.getElementById("judul").value;
-      const lokasiSelect = document.getElementById("lokasiSelect").value.split("|");
-      const lokasi = lokasiSelect[0];
-      const koordinat = lokasiSelect[1];
-      const nama = document.getElementById("nama").value;
+            const [lokasi, koordinat] = document.getElementById("lokasiSelect").value.split("|");
+            const nama = document.getElementById("nama").value;
+            const now = new Date();
+            const waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+            const tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
 
-      let now = new Date();
-      let waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-      let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+            const fontJudul = Math.floor(h * 0.04);
+            const fontDetail = Math.floor(h * 0.025);
+            const fontMarkiBig = Math.floor(h * 0.035);
+            const fontMarkiSmall = Math.floor(h * 0.025);
 
-      const fontJudul = Math.floor(h * 0.04);
-      const fontDetail = Math.floor(h * 0.025);
-      const fontMarkiBig = Math.floor(h * 0.035);
-      const fontMarkiSmall = Math.floor(h * 0.025);
+            const textLines = [
+                `• Waktu: ${waktu}`,
+                `• Tanggal: ${tanggal}`,
+                `• Lokasi: ${lokasi}`,
+                `• Koordinat: ${koordinat}`,
+                `• ${nama}`,
+                "✓ Waktu & lokasi diverifikasi oleh Marki"
+            ];
 
-      ctx.fillStyle = "white";
-      ctx.textBaseline = "top";
-      ctx.shadowColor = "black";
-      ctx.shadowBlur = 6;
-      ctx.textAlign = "left";
+            ctx.fillStyle = "white";
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 6;
+            ctx.textAlign = "left";
 
-      // Judul
-      ctx.font = `${fontJudul}px Arial Black`;
-      let y = h - (7 * fontDetail + fontJudul + 80);
-      ctx.fillText(judul, 30, y);
-      y += fontJudul + 10;
+            // --- blok kiri bawah ---
+            const logoWidth = w * 0.10;
+            const logoHeight = logoWidth * (logo.height / logo.width);
+            const baseX = 20;
+            let y = h - 20; // mulai dari bawah
+            ctx.textBaseline = "bottom";
 
-      // Detail
-      ctx.font = `${fontDetail}px Arial`;
-      let textLines = [
-        `• Waktu: ${waktu}`,
-        `• Tanggal: ${tanggal}`,
-        `• Lokasi: ${lokasi}`,
-        `• Koordinat: ${koordinat}`,
-        `• ${nama}`,
-        "✓ Waktu & lokasi diverifikasi oleh Marki"
-      ];
-      textLines.forEach(line => {
-        ctx.fillText(line, 30, y);
-        y += fontDetail + 8;
-      });
+            // detail paling bawah
+            ctx.font = `${fontDetail}px Arial`;
+            for (let i = textLines.length - 1; i >= 0; i--) {
+                ctx.fillText(textLines[i], baseX, y);
+                y -= fontDetail + 6;
+            }
 
-      // Watermark kanan bawah
-      ctx.textAlign = "right";
-      ctx.font = `${fontMarkiBig}px Arial Black`;
-      ctx.fillText("Marki", w - 30, h - (fontMarkiBig + fontMarkiSmall + 20));
+            // judul dua baris, langsung menempel tanpa jarak ekstra
+            ctx.font = `bold ${fontJudul}px Arial`;
+            for (let i = judulLines.length - 1; i >= 0; i--) {
+                ctx.fillText(judulLines[i], baseX, y);
+                y -= fontJudul + 6;
+            }
 
-      ctx.font = `${fontMarkiSmall}px Arial`;
-      ctx.fillText("Waktu asli", w - 30, h - (fontMarkiSmall + 10));
+            // logo di atas judul
+            y -= logoHeight;
+            ctx.drawImage(logo, baseX, y, logoWidth, logoHeight);
 
-      const dataUrl = canvas.toDataURL("image/png");
+            // --- watermark kanan bawah ---
+            ctx.textAlign = "right";
+            ctx.textBaseline = "bottom";
+            ctx.font = `${fontMarkiSmall}px Arial`;
+            ctx.fillText("Waktu asli", w - 30, h - 20);
+            ctx.font = `bold ${fontMarkiBig}px Arial`;
+            ctx.fillText("Marki", w - 30, h - 20 - fontMarkiSmall - 4);
 
-      const item = document.createElement("div");
-      item.className = "gallery-item";
+            const dataUrl = canvas.toDataURL("image/png");
+            const item = document.createElement("div");
+            item.className = "gallery-item";
+            const newImg = new Image();
+            newImg.src = dataUrl;
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = "foto_timestamp.png";
+            link.className = "btn-download";
+            link.innerText = "Download Foto";
+            item.appendChild(newImg);
+            item.appendChild(link);
+            gallery.appendChild(item);
+        }
 
-      const newImg = new Image();
-      newImg.src = dataUrl;
-
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "foto_timestamp.png";
-      link.className = "btn-download";
-      link.innerText = "Download Foto";
-
-      item.appendChild(newImg);
-      item.appendChild(link);
-      gallery.appendChild(item);
-    }
-
-    // Capture dari kamera
-    captureBtn.onclick = () => {
-      const w = video.videoWidth;
-      const h = video.videoHeight;
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(video, 0, 0, w, h);
-
-      let img = new Image();
-      img.src = canvas.toDataURL("image/png");
-      img.onload = () => renderImage(img);
-    };
-
-    // Upload file fallback
-    document.getElementById("fileInput").onchange = (e) => {
-      const files = e.target.files;
-      if (!files) return;
-      [...files].forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          let img = new Image();
-          img.src = ev.target.result;
-          img.onload = () => renderImage(img);
+        captureBtn.onclick = () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const img = new Image();
+            img.src = canvas.toDataURL("image/png");
+            img.onload = () => renderImage(img);
         };
-        reader.readAsDataURL(file);
-      });
-    };
-  </script>
+
+        document.getElementById("fileInput").onchange = e => {
+            const files = e.target.files;
+            if (!files) return;
+            [...files].forEach(f => {
+                const r = new FileReader();
+                r.onload = ev => {
+                    const img = new Image();
+                    img.src = ev.target.result;
+                    img.onload = () => renderImage(img);
+                };
+                r.readAsDataURL(f);
+            });
+        };
+    </script>
 </body>
 
 </html>
