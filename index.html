@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Foto Timestamp Manual</title>
+    <title>Foto Timestamp Format Marki</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -89,7 +89,7 @@
     <button class="btn btn-primary" id="capture">Ambil Foto</button>
 
     <h3>Atau Pilih Foto dari File</h3>
-    <input type="file" id="fileInput" accept="image/*" class="btn">
+    <input type="file" id="fileInput" accept="image/*" class="btn" multiple>
 
     <canvas id="canvas"></canvas>
 
@@ -128,15 +128,27 @@
             let waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
             let tanggal = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
 
-            // Style teks
+            // Skala font proporsional terhadap tinggi gambar
+            const fontJudul = Math.floor(h * 0.04);     // 4% tinggi
+            const fontDetail = Math.floor(h * 0.025);   // 2.5% tinggi
+            const fontMarkiBig = Math.floor(h * 0.035);
+            const fontMarkiSmall = Math.floor(h * 0.025);
+
             ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
             ctx.textBaseline = "top";
             ctx.shadowColor = "black";
             ctx.shadowBlur = 6;
+            ctx.textAlign = "left";
 
+            // Judul
+            ctx.font = `${fontJudul}px Arial Black`;
+            let y = h - (7 * fontDetail + fontJudul + 80); // biar pas di bawah
+            ctx.fillText(judul, 30, y);
+            y += fontJudul + 10;
+
+            // Detail kegiatan
+            ctx.font = `${fontDetail}px Arial`;
             let textLines = [
-                `• ${judul}`,
                 `• Waktu: ${waktu}`,
                 `• Tanggal: ${tanggal}`,
                 `• Lokasi: ${lokasi}`,
@@ -144,19 +156,18 @@
                 `• ${nama}`,
                 "✓ Waktu & lokasi diverifikasi oleh Marki"
             ];
-
-            let y = 40;
             textLines.forEach(line => {
                 ctx.fillText(line, 30, y);
-                y += 28;
+                y += fontDetail + 8;
             });
 
             // Watermark di pojok kanan bawah
-            ctx.font = "26px Arial Black";
             ctx.textAlign = "right";
-            ctx.fillText("Marki", w - 30, h - 70);
-            ctx.font = "18px Arial";
-            ctx.fillText("Waktu asli", w - 30, h - 40);
+            ctx.font = `${fontMarkiBig}px Arial Black`;
+            ctx.fillText("Marki", w - 30, h - (fontMarkiBig + fontMarkiSmall + 20));
+
+            ctx.font = `${fontMarkiSmall}px Arial`;
+            ctx.fillText("Waktu asli", w - 30, h - (fontMarkiSmall + 10));
 
             const dataUrl = canvas.toDataURL("image/png");
 
@@ -190,17 +201,19 @@
             img.onload = () => renderImage(img);
         };
 
-        // Upload file foto
+        // Upload file foto (bisa banyak)
         document.getElementById("fileInput").onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                let img = new Image();
-                img.src = ev.target.result;
-                img.onload = () => renderImage(img);
-            };
-            reader.readAsDataURL(file);
+            const files = e.target.files;
+            if (!files) return;
+            [...files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    let img = new Image();
+                    img.src = ev.target.result;
+                    img.onload = () => renderImage(img);
+                };
+                reader.readAsDataURL(file);
+            });
         };
     </script>
 </body>
